@@ -1,7 +1,7 @@
 ﻿using CommandLine;
 using System;
 
-namespace GithubAction;
+namespace GithubAction.Models;
 
 public class ActionInputs
 {

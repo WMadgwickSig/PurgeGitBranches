@@ -2,7 +2,7 @@
   "profiles": {
     "GithubAction": {
       "commandName": "Project",
-      "commandLineArgs": "-t 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 -d true"
+      "commandLineArgs": "-t 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 -d true"
     }
   }
 }
