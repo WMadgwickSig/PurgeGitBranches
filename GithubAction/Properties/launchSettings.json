@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "GithubAction": {
+      "commandName": "Project",
+      "commandLineArgs": "-t myToken -d true"
+    }
+  }
+}
