@@ -2,7 +2,7 @@
   "profiles": {
     "GithubAction": {
       "commandName": "Project",
-      "commandLineArgs": "-t myToken -d true"
+      "commandLineArgs": "-t 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 -d true"
     }
   }
 }
