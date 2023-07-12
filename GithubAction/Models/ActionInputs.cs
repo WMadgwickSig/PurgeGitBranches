@@ -14,7 +14,7 @@ public class ActionInputs
     [Option('c', "daysSinceLastCommit", Required = true, HelpText = "Minimum days since last commit?")]
     public int MinimumDaysSinceLastCommit { get; set; }
 
-    [Option('e', "branchesToExclude", Required = false, HelpText = "Branches to exclude as a comma separated list")]
+    [Option('e', "branchesToExclude", Required = false, HelpText = "Branches to exclude as a comma separated list", Default = "main,master,develop")]
     public string BranchedToExclude { get; set; } = null!;
 
     static void ParseAndAssign(string? value, Action<string> assign)

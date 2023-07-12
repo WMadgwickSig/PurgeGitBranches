@@ -22,16 +22,8 @@ static TService Get<TService>(IHost host)
 
 static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host) 
 {
-    string baseUri = "https://api.github.com";
-    string repo = "WMadgwickSig/PurgeGitBranches"; // TODO: get from environment variable
-    var now = DateTime.UtcNow;
-    List<string> branchesToExclude = new() { "master", "main", "victrix", "rapax", "herculia", "ReportBuilder" };
     var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
-
-    if (!string.IsNullOrWhiteSpace(inputs.BranchedToExclude)) 
-    {
-        branchesToExclude.AddRange(inputs.BranchedToExclude.Split(','));
-    }
+    string baseUri = "https://api.github.com";
 
     HttpClient client = new()
     {
@@ -45,6 +37,21 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
 
     try
     {
+        string? repo = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");
+
+        if (string.IsNullOrWhiteSpace(repo))
+        {
+            throw new Exception("Could not find repo from the GITHUB_REPOSITORY env variable");
+        }
+
+        var now = DateTime.UtcNow;
+        List<string> branchesToExclude = new();
+
+        if (!string.IsNullOrWhiteSpace(inputs.BranchedToExclude))
+        {
+            branchesToExclude.AddRange(inputs.BranchedToExclude.Split(','));
+        }
+
         var branches = await GetBranches(client, repo);
         var pulls = await GetOpenPullRequests(client, repo);
 
@@ -127,7 +134,7 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
 
     var response = new BranchPurgeResponse
     {
-        BranchAge = $"{branchLastActivityInDays} days",
+        DaysSinceLastActivity = $"{branchLastActivityInDays} days",
         Branch = branch.Name
     };
 
