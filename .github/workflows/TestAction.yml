@@ -32,9 +32,9 @@ jobs:
           daysSinceLastCommit: ${{ github.event.inputs.daysSinceLastCommit }}
       - name: Get output
         run: |
-          echo '${{ steps.purge-old-branches.outputs.exception }}'
-          echo '${{ steps.purge-old-branches.outputs.was-dryrun }}'
-          echo '${{ steps.purge-old-branches.outputs.min-days-since-last-commit }}'
-          echo '${{ steps.purge-old-branches.outputs.excluded-branches }}'
-          echo '${{ steps.purge-old-branches.outputs.total-branches-purged }}'
-          echo '${{ steps.purge-old-branches.outputs.result-json }}'
+          echo 'exception = ${{ steps.purge-old-branches.outputs.exception }}'
+          echo 'was-dryrun = ${{ steps.purge-old-branches.outputs.was-dryrun }}'
+          echo 'min-days-since-last-commit = ${{ steps.purge-old-branches.outputs.min-days-since-last-commit }}'
+          echo 'excluded-branches = ${{ steps.purge-old-branches.outputs.excluded-branches }}'
+          echo 'total-branches-purged = ${{ steps.purge-old-branches.outputs.total-branches-purged }}'
+          echo 'result-json = ${{ steps.purge-old-branches.outputs.result-json }}'
