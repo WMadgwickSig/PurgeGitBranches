@@ -8,8 +8,8 @@ on:
         required: true
         default: 'true'
         options:
-          - 'true'
-          - 'false'
+          - 'yes'
+          - 'no'
       daysSinceLastCommit:
         description: Total days since last commit.
         type: string
