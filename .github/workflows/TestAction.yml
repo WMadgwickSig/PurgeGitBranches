@@ -4,9 +4,12 @@ on:
     inputs:
       dryRun:
         description: Do a dry run first, which won't delete any branches (Recommended)?
-        type: boolean
+        type: choice
         required: true
-        default: true
+        default: 'true'
+        options:
+          - 'true'
+          - 'false'
       daysSinceLastCommit:
         description: Total days since last commit.
         type: string
