@@ -29,7 +29,7 @@ jobs:
         id: purge-old-branches
         uses: WMadgwickSig/PurgeGitBranches@main
         with:
-          repoToken: ${{ github.token }}
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
           dryRun: ${{ github.event.inputs.dryRun }}
           branchesToExclude: ${{ github.event.inputs.branchesToExclude }}
           daysSinceLastCommit: ${{ github.event.inputs.daysSinceLastCommit }}
