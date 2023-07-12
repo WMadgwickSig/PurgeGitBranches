@@ -7,7 +7,7 @@ COPY . ./
 RUN dotnet publish ./GithubAction/GithubAction.csproj -c Release -o out --no-self-contained
 
 # Label the container
-LABEL maintainer="William Madgwick <david.pine@microsoft.com>"
+LABEL maintainer="William Madgwick <william.madgwick@signify.co.za>"
 LABEL repository="https://github.com/WMadgwickSig/PurgeGitBranches"
 LABEL homepage="https://github.com/WMadgwickSig/PurgeGitBranches"
 

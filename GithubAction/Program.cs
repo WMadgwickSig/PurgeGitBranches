@@ -189,7 +189,7 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
     if (hasOpenPull) 
     {
         response.Deleted = false;
-        response.Message = "Branch is has an open pull request";
+        response.Message = "Branch has an open pull request";
 
         return response;
     }
@@ -211,30 +211,28 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
 
         return response;
     }
-    else 
+
+    try
     {
-        try
+        var deleteResponse = await client.DeleteAsync($"repos/{repo}/git/refs/heads/{branch.Name}");
+        if (deleteResponse.StatusCode == System.Net.HttpStatusCode.NoContent)
         {
-            var deleteResponse = await client.DeleteAsync($"repos/{repo}/git/refs/heads/{branch.Name}");
-            if (deleteResponse.StatusCode == System.Net.HttpStatusCode.NoContent)
-            {
-                response.Deleted = true;
-                response.Message = "Deleted";
-            }
-            else
-            {
-                response.Deleted = false;
-                response.Message = $"Unsuccessful status code: {deleteResponse.StatusCode}";
-            }
+            response.Deleted = true;
+            response.Message = "Deleted";
         }
-        catch (Exception ex)
+        else
         {
             response.Deleted = false;
-            response.Message = $"Exception thrown: {ex.Message}";
+            response.Message = $"Unsuccessful status code: {deleteResponse.StatusCode}";
         }
-
-        return response;
     }
+    catch (Exception ex)
+    {
+        response.Deleted = false;
+        response.Message = $"Exception thrown: {ex.Message}";
+    }
+
+    return response;
 }
 
 var parser = Default.ParseArguments<ActionInputs>(() => new(), args);
