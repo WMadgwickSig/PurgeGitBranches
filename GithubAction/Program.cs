@@ -26,7 +26,8 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
     string repo = "WMadgwickSig/PurgeGitBranches"; // TODO: get from environment variable
     var now = DateTime.UtcNow;
     List<string> branchesToExclude = new() { "master", "main", "victrix", "rapax", "herculia", "ReportBuilder" };
-    
+    var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
+
     if (!string.IsNullOrWhiteSpace(inputs.BranchedToExclude)) 
     {
         branchesToExclude.AddRange(inputs.BranchedToExclude.Split(','));
@@ -55,10 +56,27 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
 
             finalResponse.Add(await PurgeBranch(inputs, client, branchDetail, repo, pulls, now, branchesToExclude));
         }
+
+        if (!string.IsNullOrWhiteSpace(gitHubOutputFile)) 
+        {
+            using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
+            textWriter.WriteLine($"was-dryrun={inputs.DryRun}");
+            textWriter.WriteLine($"min-days-since-last-commit={inputs.MinimumDaysSinceLastCommit}");
+            textWriter.WriteLine($"excluded-branches={string.Join(',', branchesToExclude)}");
+            textWriter.WriteLine($"branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
+            textWriter.WriteLine($"result-json={JsonConvert.SerializeObject(finalResponse)}");
+        }
+        else 
+        {
+            Console.WriteLine($"was-dryrun={inputs.DryRun}");
+            Console.WriteLine($"min-days-since-last-commit={inputs.MinimumDaysSinceLastCommit}");
+            Console.WriteLine($"excluded-branches={string.Join(',', branchesToExclude)}");
+            Console.WriteLine($"branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
+            Console.WriteLine($"result-json={JsonConvert.SerializeObject(finalResponse)}");
+        }
     }
     catch (Exception ex)
     {
-        var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
         if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
         {
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
