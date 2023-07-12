@@ -1,0 +1,40 @@
+name: Purge old branches test
+on:
+  workflow_dispatch:
+    inputs:
+      dryRun:
+        description: Do a dry run first, which won't delete any branches (Recommended)?
+        type: boolean
+        required: true
+        default: true
+      daysSinceLastCommit:
+        description: Total days since last commit.
+        type: string
+        required: true
+        default: "90"
+      branchesToExclude:
+        description: Comma separated list of branches to exclude
+        type: string
+        required: false
+        default: "main,master,develop"
+jobs:
+  purging:
+    name: Purge old branches
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Purge old branches Action
+        id: purge-old-branches
+        uses: WMadgwickSig/PurgeGitBranches@main
+        with:
+          repoToken: ${{ github.token }}
+          dryRun: ${{ github.event.inputs.dryRun }}
+          branchesToExclude: ${{ github.event.inputs.branchesToExclude }}
+          daysSinceLastCommit: ${{ github.event.inputs.daysSinceLastCommit }}
+      - name: Get output
+        run: |
+          echo '${{ steps.purge-old-branches.outputs.exception }}'
+          echo '${{ steps.purge-old-branches.outputs.was-dryrun }}'
+          echo '${{ steps.purge-old-branches.outputs.min-days-since-last-commit }}'
+          echo '${{ steps.purge-old-branches.outputs.excluded-branches }}'
+          echo '${{ steps.purge-old-branches.outputs.total-branches-purged }}'
+          echo '${{ steps.purge-old-branches.outputs.result-json }}'
