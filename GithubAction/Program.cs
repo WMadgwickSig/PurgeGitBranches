@@ -37,6 +37,8 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
 
     try
     {
+        bool isDryRun = IsDryRun(inputs.DryRun);
+
         string? repo = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");
 
         if (string.IsNullOrWhiteSpace(repo))
@@ -61,7 +63,7 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
         {
             var branchDetail = await GetBranchDetail(branch.Name, client, repo);
 
-            finalResponse.Add(await PurgeBranch(inputs, client, branchDetail, repo, pulls, now, branchesToExclude));
+            finalResponse.Add(await PurgeBranch(inputs, client, branchDetail, repo, pulls, now, branchesToExclude, isDryRun));
         }
 
         if (!string.IsNullOrWhiteSpace(gitHubOutputFile)) 
@@ -99,6 +101,31 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
     Environment.Exit(0);
 }
 
+static bool IsDryRun(string dryRun)
+{
+    if (dryRun.Equals("true", StringComparison.OrdinalIgnoreCase)) 
+    {
+        return true;
+    }
+
+    if (dryRun.Equals("yes", StringComparison.OrdinalIgnoreCase))
+    {
+        return true;
+    }
+
+    if (dryRun.Equals("false", StringComparison.OrdinalIgnoreCase))
+    {
+        return false;
+    }
+
+    if (dryRun.Equals("no", StringComparison.OrdinalIgnoreCase))
+    {
+        return false;
+    }
+
+    throw new Exception($"Could not get dry run value {dryRun}");
+}
+
 static async Task<BranchDetailModel> GetBranchDetail(string branch, HttpClient client, string repo) 
 {
     string branchUrl = $"repos/{repo}/branches";
@@ -127,7 +154,7 @@ static async Task<IList<PullRequestModel>> GetOpenPullRequests(HttpClient client
     return pulls;
 }
 
-static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClient client, BranchDetailModel branch, string repo, IList<PullRequestModel> pulls, DateTime now, List<string> branchesToExclude) 
+static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClient client, BranchDetailModel branch, string repo, IList<PullRequestModel> pulls, DateTime now, List<string> branchesToExclude, bool isDryRun) 
 {
     var branchLastActivityDate = branch.Commit.Commit.Author.Date;
     int branchLastActivityInDays = (int)(now - branchLastActivityDate).TotalDays;
@@ -177,7 +204,7 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
     }
 
     // See if this is a dry run
-    if (inputs.DryRun) 
+    if (isDryRun)
     {
         response.Deleted = true;
         response.Message = "Deleted (Dry-run)";

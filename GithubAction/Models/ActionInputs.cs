@@ -8,7 +8,7 @@ public class ActionInputs
     public string RepoToken { get; set; } = null!;
 
     [Option('d', "dryRun", Required = true, HelpText = "Do a dry or test run first to see which branches will be purged?")]
-    public bool DryRun { get; set; }
+    public string DryRun { get; set; } = null!;
 
     [Option('c', "daysSinceLastCommit", Required = true, HelpText = "Minimum days since last commit?")]
     public int MinimumDaysSinceLastCommit { get; set; }
