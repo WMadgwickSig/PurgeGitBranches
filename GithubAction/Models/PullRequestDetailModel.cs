@@ -2,5 +2,5 @@
 
 public class PullRequestDetailModel
 {
-    public string Ref { get; set; }
+    public string Ref { get; set; } = null!;
 }

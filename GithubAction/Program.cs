@@ -10,6 +10,8 @@ using GithubAction.Models;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 using static CommandLine.Parser;
+using System.IO;
+using System.Text;
 
 using IHost host = Host.CreateDefaultBuilder(args)
    .Build();
@@ -42,40 +44,61 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
 
     try
     {
-        string branchUrl = $"repos/{repo}/branches";
-
+        var branches = await GetBranches(client, repo);
         var pulls = await GetOpenPullRequests(client, repo);
 
-        var branchesResponse = await client.GetAsync(branchUrl);
-        var branchesStringResult = await branchesResponse.Content.ReadAsStringAsync(); // TODO: Check null or empty
-
-        var branches = JsonConvert.DeserializeObject<IList<BranchModel>>(branchesStringResult);
         var finalResponse = new List<BranchPurgeResponse>();
 
         foreach(var branch in branches) 
         {
-            var branchResponse = await client.GetAsync($"{branchUrl}/{branch.Name}");
-            var branchStringResult = await branchResponse.Content.ReadAsStringAsync(); // TODO: Check null or empty
-
-            var branchDetail = JsonConvert.DeserializeObject<BranchDetailModel>(branchStringResult);
+            var branchDetail = await GetBranchDetail(branch.Name, client, repo);
 
             finalResponse.Add(await PurgeBranch(inputs, client, branchDetail, repo, pulls, now, branchesToExclude));
         }
     }
     catch (Exception ex)
     {
-        // TODO
+        var gitHubOutputFile = Environment.GetEnvironmentVariable("GITHUB_OUTPUT");
+        if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
+        {
+            using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
+            textWriter.WriteLine($"exception={ex.Message}");
+        }
+        else 
+        {
+            Console.WriteLine($"exception={ex.Message}");
+        }
     }
 
     client.Dispose();
     Environment.Exit(0);
 }
 
+static async Task<BranchDetailModel> GetBranchDetail(string branch, HttpClient client, string repo) 
+{
+    string branchUrl = $"repos/{repo}/branches";
+    var branchResponse = await client.GetAsync($"{branchUrl}/{branch}");
+    var branchStringResult = await branchResponse.Content.ReadAsStringAsync();
+    var branchDetail = JsonConvert.DeserializeObject<BranchDetailModel>(branchStringResult) 
+        ?? throw new Exception($"Could not get branch detail for {branch}");
+
+    return branchDetail;
+}
+
+static async Task<IList<BranchModel>> GetBranches(HttpClient client, string repo) 
+{
+    string branchUrl = $"repos/{repo}/branches";
+    var response = await client.GetAsync(branchUrl);
+    var stringResult = await response.Content.ReadAsStringAsync();
+    var branches = JsonConvert.DeserializeObject<IList<BranchModel>>(stringResult) ?? new List<BranchModel>();
+    return branches;
+}
+
 static async Task<IList<PullRequestModel>> GetOpenPullRequests(HttpClient client, string repo) 
 {
     var response = await client.GetAsync($"repos/{repo}/pulls?state=open");
     var stringResult = await response.Content.ReadAsStringAsync();
-    var pulls = JsonConvert.DeserializeObject<IList<PullRequestModel>>(stringResult);
+    var pulls = JsonConvert.DeserializeObject<IList<PullRequestModel>>(stringResult) ?? new List<PullRequestModel>();
     return pulls;
 }
 
