@@ -30,7 +30,7 @@ jobs:
         uses: WMadgwickSig/PurgeGitBranches@main
         with:
           repoToken: ${{ github.token }}
-          dryRun: ${{ github.event.inputs.dryRun }}
+          dryRun: false
           branchesToExclude: ${{ github.event.inputs.branchesToExclude }}
           daysSinceLastCommit: ${{ github.event.inputs.daysSinceLastCommit }}
       - name: Get output
