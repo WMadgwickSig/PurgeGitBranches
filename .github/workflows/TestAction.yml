@@ -20,7 +20,7 @@ on:
         type: string
         required: false
         default: "main,master,develop"
-permissions: read-all|write-all
+permissions: write-all
 jobs:
   purging:
     name: Purge old branches
