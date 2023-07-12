@@ -4,7 +4,7 @@ FROM mcr.microsoft.com/dotnet/sdk:7.0 as build-env
 # Copy everything and publish the release (publish implicitly restores and builds)
 WORKDIR /app
 COPY . ./
-RUN dotnet publish ./GitHubAction/GitHubAction.csproj -c Release -o out --no-self-contained
+RUN dotnet publish ./GithubAction/GithubAction.csproj -c Release -o out --no-self-contained
 
 # Label the container
 LABEL maintainer="William Madgwick <david.pine@microsoft.com>"
@@ -23,4 +23,4 @@ LABEL com.github.actions.color="blue"
 # Relayer the .NET SDK, anew with the build output
 FROM mcr.microsoft.com/dotnet/sdk:7.0
 COPY --from=build-env /app/out .
-ENTRYPOINT [ "dotnet", "GitHubAction.dll" ]
+ENTRYPOINT [ "dotnet", "GithubAction.dll" ]
