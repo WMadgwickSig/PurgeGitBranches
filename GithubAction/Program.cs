@@ -70,7 +70,7 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
             textWriter.WriteLine($"was-dryrun={inputs.DryRun}");
             textWriter.WriteLine($"min-days-since-last-commit={inputs.MinimumDaysSinceLastCommit}");
             textWriter.WriteLine($"excluded-branches={string.Join(',', branchesToExclude)}");
-            textWriter.WriteLine($"branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
+            textWriter.WriteLine($"total-branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
             textWriter.WriteLine($"result-json={JsonConvert.SerializeObject(finalResponse)}");
         }
         else 
@@ -78,7 +78,7 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
             Console.WriteLine($"was-dryrun={inputs.DryRun}");
             Console.WriteLine($"min-days-since-last-commit={inputs.MinimumDaysSinceLastCommit}");
             Console.WriteLine($"excluded-branches={string.Join(',', branchesToExclude)}");
-            Console.WriteLine($"branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
+            Console.WriteLine($"total-branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
             Console.WriteLine($"result-json={JsonConvert.SerializeObject(finalResponse)}");
         }
     }

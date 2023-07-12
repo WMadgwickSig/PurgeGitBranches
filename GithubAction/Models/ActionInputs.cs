@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using System;
 
 namespace GithubAction.Models;
 
@@ -16,12 +15,4 @@ public class ActionInputs
 
     [Option('e', "branchesToExclude", Required = false, HelpText = "Branches to exclude as a comma separated list", Default = "main,master,develop")]
     public string BranchedToExclude { get; set; } = null!;
-
-    static void ParseAndAssign(string? value, Action<string> assign)
-    {
-        if (value is { Length: > 0 } && assign is not null)
-        {
-            assign(value.Split("/")[^1]);
-        }
-    }
 }

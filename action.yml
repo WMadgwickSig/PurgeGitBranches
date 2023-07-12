@@ -1,0 +1,44 @@
+name: 'Purge old branches'
+description: 'A GitHub action that purges branches with activity older than a specified time.'
+branding:
+  icon: activity
+  color: blue
+inputs:
+  repoToken:
+    description: 'GitHub repository token used for authentication.'
+    required: true
+  dryRun:
+    description: 'Do a dry or test run first to see which branches will be purged?'
+    required: true
+  daysSinceLastCommit:
+    description: 'Minimum days since last commit?'
+    required: true
+  branchesToExclude:
+    description: 'Branches to exclude as a comma separated list.'
+    required: false
+    default: 'main,master,develop'
+outputs:
+  exception:
+    description: 'Exception thrown during execution.'
+  was-dryrun:
+    description: 'Was it a dry run.'
+  min-days-since-last-commit:
+    description: 'Minimum days since last commit.'
+  excluded-branches:
+    description: 'The branches that were excluded.'
+  total-branches-purged:
+    description: 'Total number of branches purged.'
+  result-json:
+    description: 'Comprehensive result as JSON string.'
+runs:
+  using: 'docker'
+  image: 'Dockerfile'
+  args:
+  - '-t'
+  - ${{ inputs.repoToken }}
+  - '-d'
+  - ${{ inputs.dryRun }}
+  - '-c'
+  - ${{ inputs.daysSinceLastCommit }}
+  - '-e'
+  - ${{ inputs.branchesToExclude }}
