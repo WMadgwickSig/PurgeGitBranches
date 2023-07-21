@@ -6,7 +6,15 @@ on:
         description: Do a dry run first, which won't delete any branches (Recommended)?
         type: choice
         required: true
-        default: 'true'
+        default: 'yes'
+        options:
+          - 'yes'
+          - 'no'
+      wasMerged:
+        description: Delete only branches with pull requests which has been merged?
+        type: choice
+        required: false
+        default: 'yes'
         options:
           - 'yes'
           - 'no'
@@ -32,12 +40,14 @@ jobs:
         with:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           dryRun: ${{ github.event.inputs.dryRun }}
+          wasMerged: ${{ github.event.inputs.wasMerged }}
           branchesToExclude: ${{ github.event.inputs.branchesToExclude }}
           daysSinceLastCommit: ${{ github.event.inputs.daysSinceLastCommit }}
       - name: Get output
         run: |
           echo 'exception = ${{ steps.purge-old-branches.outputs.exception }}'
           echo 'was-dryrun = ${{ steps.purge-old-branches.outputs.was-dryrun }}'
+          echo 'was-merged = ${{ steps.purge-old-branches.outputs.was-merged }}'
           echo 'min-days-since-last-commit = ${{ steps.purge-old-branches.outputs.min-days-since-last-commit }}'
           echo 'excluded-branches = ${{ steps.purge-old-branches.outputs.excluded-branches }}'
           echo 'total-branches-purged = ${{ steps.purge-old-branches.outputs.total-branches-purged }}'
