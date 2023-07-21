@@ -11,7 +11,7 @@ on:
           - 'yes'
           - 'no'
       wasMerged:
-        description: Delete only branches with pull requests which has been merged?
+        description: Delete only branches with pull requests which has been merged in?
         type: choice
         required: false
         default: 'yes'
