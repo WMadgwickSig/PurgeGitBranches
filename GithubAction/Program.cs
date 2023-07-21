@@ -94,11 +94,11 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
         if (!string.IsNullOrWhiteSpace(gitHubOutputFile))
         {
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
-            textWriter.WriteLine($"exception={ex.Message}");
+            textWriter.WriteLine($"exception={ex.Message}|{ex.StackTrace}");
         }
         else 
         {
-            Console.WriteLine($"exception={ex.Message}");
+            Console.WriteLine($"exception={ex.Message}|{ex.StackTrace}");
         }
     }
 
