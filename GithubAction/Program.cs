@@ -55,7 +55,9 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
             branchesToExclude.AddRange(inputs.BranchedToExclude.Split(','));
         }
 
-        var branches = await GetBranches(client, repo);
+        var branches = new List<BranchModel>();
+
+        await GetBranches(client, repo, branches);
         var pulls = await GetOpenPullRequests(client, repo);
 
         var finalResponse = new List<BranchPurgeResponse>();
@@ -145,13 +147,20 @@ static async Task<BranchDetailModel> GetBranchDetail(string branch, HttpClient c
     return branchDetail;
 }
 
-static async Task<IList<BranchModel>> GetBranches(HttpClient client, string repo) 
+static async Task GetBranches(HttpClient client, string repo, List<BranchModel> branches, int pageIndex = 1) 
 {
-    string branchUrl = $"repos/{repo}/branches";
+    string branchUrl = $"repos/{repo}/branches?per_page=100&page={pageIndex}";
     var response = await client.GetAsync(branchUrl);
     var stringResult = await response.Content.ReadAsStringAsync();
-    var branches = JsonConvert.DeserializeObject<IList<BranchModel>>(stringResult) ?? new List<BranchModel>();
-    return branches;
+    var fetchedBranches = JsonConvert.DeserializeObject<List<BranchModel>>(stringResult) ?? new List<BranchModel>();
+    branches.AddRange(fetchedBranches);
+
+    if (fetchedBranches.Count == 0) 
+    {
+        return;
+    }
+
+    await GetBranches(client, repo, branches, pageIndex++);
 }
 
 static async Task<IList<PullRequestModel>> GetOpenPullRequests(HttpClient client, string repo) 
