@@ -74,7 +74,7 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
             textWriter.WriteLine($"was-merged={inputs.WasMerged}");
             textWriter.WriteLine($"min-days-since-last-commit={inputs.MinimumDaysSinceLastCommit}");
             textWriter.WriteLine($"excluded-branches={string.Join(',', branchesToExclude)}");
-            textWriter.WriteLine($"total-branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
+            textWriter.WriteLine($"total-branches-purged={finalResponse.Where(w => w.Purged).Count()}");
             textWriter.WriteLine($"result-json={JsonConvert.SerializeObject(finalResponse)}");
         }
         else 
@@ -83,7 +83,7 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
             Console.WriteLine($"was-merged={inputs.WasMerged}");
             Console.WriteLine($"min-days-since-last-commit={inputs.MinimumDaysSinceLastCommit}");
             Console.WriteLine($"excluded-branches={string.Join(',', branchesToExclude)}");
-            Console.WriteLine($"total-branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
+            Console.WriteLine($"total-branches-purged={finalResponse.Where(w => w.Purged).Count()}");
             Console.WriteLine($"result-json={JsonConvert.SerializeObject(finalResponse)}");
         }
     }
@@ -176,7 +176,7 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
     // See if the branch is protected
     if (branch.Protected) 
     {
-        response.Deleted = false;
+        response.Purged = false;
         response.Message = "Branch is protected";
 
         return response;
@@ -186,7 +186,7 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
     bool excluded = branchesToExclude.Any(a => a.Equals(branch.Name, StringComparison.OrdinalIgnoreCase));
     if (excluded) 
     {
-        response.Deleted = false;
+        response.Purged = false;
         response.Message = "Branch is excluded";
 
         return response;
@@ -196,7 +196,7 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
     bool hasOpenPull = pulls.Any(a => a.State == "open" && (a.Head.Ref.Equals(branch.Name, StringComparison.OrdinalIgnoreCase) || a.Base.Ref.Equals(branch.Name, StringComparison.OrdinalIgnoreCase)));
     if (hasOpenPull) 
     {
-        response.Deleted = false;
+        response.Purged = false;
         response.Message = "Branch has an open pull request";
 
         return response;
@@ -205,7 +205,7 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
     // See if the branch meets the minimum last activity requirement
     if (branchLastActivityInDays < inputs.MinimumDaysSinceLastCommit)
     {
-        response.Deleted = false;
+        response.Purged = false;
         response.Message = "Branch has recent activity";
 
         return response;
@@ -217,7 +217,7 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
         bool branchWasMergedIn = pulls.Any(a => a.MergedAt.HasValue && a.Head.Ref.Equals(branch.Name, StringComparison.OrdinalIgnoreCase));
         if (!branchWasMergedIn)
         {
-            response.Deleted = false;
+            response.Purged = false;
             response.Message = "Branch has not been merged in.";
 
             return response;
@@ -227,8 +227,8 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
     // See if this is a dry run
     if (isDryRun)
     {
-        response.Deleted = true;
-        response.Message = "Deleted (Dry-run)";
+        response.Purged = true;
+        response.Message = "Purged (Dry-run)";
 
         return response;
     }
@@ -238,18 +238,18 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
         var deleteResponse = await client.DeleteAsync($"repos/{repo}/git/refs/heads/{branch.Name}");
         if (deleteResponse.StatusCode == System.Net.HttpStatusCode.NoContent)
         {
-            response.Deleted = true;
-            response.Message = "Deleted";
+            response.Purged = true;
+            response.Message = "Purged";
         }
         else
         {
-            response.Deleted = false;
+            response.Purged = false;
             response.Message = $"Unsuccessful status code: {deleteResponse.StatusCode}";
         }
     }
     catch (Exception ex)
     {
-        response.Deleted = false;
+        response.Purged = false;
         response.Message = $"Exception thrown: {ex.Message}";
     }
 
