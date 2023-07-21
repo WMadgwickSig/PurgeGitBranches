@@ -7,7 +7,7 @@ public class ActionInputs
     [Option('t', "repoToken", Required = true, HelpText = "Github repository token used for authentication.")]
     public string RepoToken { get; set; } = null!;
 
-    [Option('d', "dryRun", Required = true, HelpText = "Do a dry or test run first to see which branches will be purged?")]
+    [Option('d', "dryRun", Required = true, HelpText = "Do a dry or test run first to see which branches will be purged? (Yes/No)")]
     public string DryRun { get; set; } = null!;
 
     [Option('c', "daysSinceLastCommit", Required = true, HelpText = "Minimum days since last commit?")]
@@ -15,4 +15,7 @@ public class ActionInputs
 
     [Option('e', "branchesToExclude", Required = false, HelpText = "Branches to exclude as a comma separated list", Default = "main,master,develop")]
     public string BranchedToExclude { get; set; } = null!;
+
+    [Option('m', "wasMerged", Required = false, HelpText = "Include only branches that were merged in? (Yes/No)")]
+    public string? WasMerged { get; set; }
 }

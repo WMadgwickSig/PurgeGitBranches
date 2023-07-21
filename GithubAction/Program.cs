@@ -9,9 +9,9 @@ using System.Net.Http;
 using GithubAction.Models;
 using System.Collections.Generic;
 using Newtonsoft.Json;
-using static CommandLine.Parser;
 using System.IO;
 using System.Text;
+using static CommandLine.Parser;
 
 using IHost host = Host.CreateDefaultBuilder(args)
    .Build();
@@ -37,7 +37,8 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
 
     try
     {
-        bool isDryRun = IsDryRun(inputs.DryRun);
+        bool isDryRun = BoolValue(inputs.DryRun);
+        bool wasMerged = BoolValue(inputs.WasMerged);
 
         string? repo = Environment.GetEnvironmentVariable("GITHUB_REPOSITORY");
 
@@ -63,7 +64,7 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
         {
             var branchDetail = await GetBranchDetail(branch.Name, client, repo);
 
-            finalResponse.Add(await PurgeBranch(inputs, client, branchDetail, repo, pulls, now, branchesToExclude, isDryRun));
+            finalResponse.Add(await PurgeBranch(inputs, client, branchDetail, repo, pulls, now, branchesToExclude, isDryRun, wasMerged));
         }
 
         if (!string.IsNullOrWhiteSpace(gitHubOutputFile)) 
@@ -101,29 +102,34 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
     Environment.Exit(0);
 }
 
-static bool IsDryRun(string dryRun)
+static bool BoolValue(string? value)
 {
-    if (dryRun.Equals("true", StringComparison.OrdinalIgnoreCase)) 
-    {
-        return true;
-    }
-
-    if (dryRun.Equals("yes", StringComparison.OrdinalIgnoreCase))
-    {
-        return true;
-    }
-
-    if (dryRun.Equals("false", StringComparison.OrdinalIgnoreCase))
+    if (string.IsNullOrWhiteSpace(value)) 
     {
         return false;
     }
 
-    if (dryRun.Equals("no", StringComparison.OrdinalIgnoreCase))
+    if (value.Equals("true", StringComparison.OrdinalIgnoreCase)) 
+    {
+        return true;
+    }
+
+    if (value.Equals("yes", StringComparison.OrdinalIgnoreCase))
+    {
+        return true;
+    }
+
+    if (value.Equals("false", StringComparison.OrdinalIgnoreCase))
     {
         return false;
     }
 
-    throw new Exception($"Could not get dry run value {dryRun}");
+    if (value.Equals("no", StringComparison.OrdinalIgnoreCase))
+    {
+        return false;
+    }
+
+    throw new Exception($"Could not get bool value {value}");
 }
 
 static async Task<BranchDetailModel> GetBranchDetail(string branch, HttpClient client, string repo) 
@@ -148,13 +154,13 @@ static async Task<IList<BranchModel>> GetBranches(HttpClient client, string repo
 
 static async Task<IList<PullRequestModel>> GetOpenPullRequests(HttpClient client, string repo) 
 {
-    var response = await client.GetAsync($"repos/{repo}/pulls?state=open");
+    var response = await client.GetAsync($"repos/{repo}/pulls?state=all");
     var stringResult = await response.Content.ReadAsStringAsync();
     var pulls = JsonConvert.DeserializeObject<IList<PullRequestModel>>(stringResult) ?? new List<PullRequestModel>();
     return pulls;
 }
 
-static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClient client, BranchDetailModel branch, string repo, IList<PullRequestModel> pulls, DateTime now, List<string> branchesToExclude, bool isDryRun) 
+static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClient client, BranchDetailModel branch, string repo, IList<PullRequestModel> pulls, DateTime now, List<string> branchesToExclude, bool isDryRun, bool wasMerged) 
 {
     var branchLastActivityDate = branch.Commit.Commit.Author.Date;
     int branchLastActivityInDays = (int)(now - branchLastActivityDate).TotalDays;
@@ -185,7 +191,7 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
     }
 
     // See if the branch has an open pull request
-    bool hasOpenPull = pulls.Any(a => a.Head.Ref.Equals(branch.Name, StringComparison.OrdinalIgnoreCase) || a.Base.Ref.Equals(branch.Name, StringComparison.OrdinalIgnoreCase));
+    bool hasOpenPull = pulls.Any(a => a.State == "open" && (a.Head.Ref.Equals(branch.Name, StringComparison.OrdinalIgnoreCase) || a.Base.Ref.Equals(branch.Name, StringComparison.OrdinalIgnoreCase)));
     if (hasOpenPull) 
     {
         response.Deleted = false;
@@ -201,6 +207,19 @@ static async Task<BranchPurgeResponse> PurgeBranch(ActionInputs inputs, HttpClie
         response.Message = "Branch has recent activity";
 
         return response;
+    }
+
+    // If this flag is on, only delete branched which had a PR and has been merged in
+    if (wasMerged)
+    {
+        bool branchWasMergedIn = pulls.Any(a => a.MergedAt.HasValue && a.Head.Ref.Equals(branch.Name, StringComparison.OrdinalIgnoreCase));
+        if (!branchWasMergedIn)
+        {
+            response.Deleted = false;
+            response.Message = "Branch has not been merged in.";
+
+            return response;
+        }
     }
 
     // See if this is a dry run
