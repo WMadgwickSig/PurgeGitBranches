@@ -8,8 +8,11 @@ inputs:
     description: 'GitHub repository token used for authentication.'
     required: true
   dryRun:
-    description: 'Do a dry or test run first to see which branches will be purged?'
+    description: 'Do a dry or test run first to see which branches will be purged? (yes/no)'
     required: true
+  wasMerged:
+    description: 'Only delete braches with pull requests that has been merged in? (yes/no)'
+    required: false
   daysSinceLastCommit:
     description: 'Minimum days since last commit?'
     required: true
@@ -38,6 +41,8 @@ runs:
   - ${{ inputs.repoToken }}
   - '-d'
   - ${{ inputs.dryRun }}
+  - '-m'
+  - ${{ inputs.wasMerged }}
   - '-c'
   - ${{ inputs.daysSinceLastCommit }}
   - '-e'
