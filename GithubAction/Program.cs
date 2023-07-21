@@ -160,7 +160,8 @@ static async Task GetBranches(HttpClient client, string repo, List<BranchModel> 
         return;
     }
 
-    await GetBranches(client, repo, branches, pageIndex++);
+    pageIndex++;
+    await GetBranches(client, repo, branches, pageIndex);
 }
 
 static async Task<IList<PullRequestModel>> GetOpenPullRequests(HttpClient client, string repo) 
