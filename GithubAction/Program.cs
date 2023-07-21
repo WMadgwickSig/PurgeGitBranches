@@ -71,6 +71,7 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
         {
             using StreamWriter textWriter = new(gitHubOutputFile, true, Encoding.UTF8);
             textWriter.WriteLine($"was-dryrun={inputs.DryRun}");
+            textWriter.WriteLine($"was-merged={inputs.WasMerged}");
             textWriter.WriteLine($"min-days-since-last-commit={inputs.MinimumDaysSinceLastCommit}");
             textWriter.WriteLine($"excluded-branches={string.Join(',', branchesToExclude)}");
             textWriter.WriteLine($"total-branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
@@ -79,6 +80,7 @@ static async Task PurgeBranchesAsync(ActionInputs inputs, IHost host)
         else 
         {
             Console.WriteLine($"was-dryrun={inputs.DryRun}");
+            Console.WriteLine($"was-merged={inputs.WasMerged}");
             Console.WriteLine($"min-days-since-last-commit={inputs.MinimumDaysSinceLastCommit}");
             Console.WriteLine($"excluded-branches={string.Join(',', branchesToExclude)}");
             Console.WriteLine($"total-branches-purged={finalResponse.Where(w => w.Deleted).Count()}");
