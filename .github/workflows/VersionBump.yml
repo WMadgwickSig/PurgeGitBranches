@@ -19,7 +19,7 @@ jobs:
         run: |
           new_version=${{ github.event.inputs.version }}
           echo "New Version: $new_version"
-          sed -i "s|<Version>.*</Version>|<Version>$new_version</Version>|" ./GithubAction.csproj
-          git add ./GithubAction.csproj
+          sed -i "s|<Version>.*</Version>|<Version>$new_version</Version>|" "GithubAction/GithubAction.csproj"
+          git add "GithubAction/GithubAction.csproj"
           git commit -m "Bump version to $new_version"
           git push origin main
