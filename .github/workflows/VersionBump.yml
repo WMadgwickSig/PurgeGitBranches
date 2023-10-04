@@ -1,0 +1,18 @@
+name: VersionBump
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: Version number to go to
+        type: string
+        required: true
+        default: "0.0.0"
+permissions: write-all
+jobs:
+  bumpVersion:
+    name: Bump Version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Get output
+        run: |
+          echo 'exception = ${{ github.event.inputs.version }}'
