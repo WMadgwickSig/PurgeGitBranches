@@ -15,4 +15,4 @@ jobs:
     steps:
       - name: Get output
         run: |
-          echo 'exception = ${{ github.event.inputs.version }}'
+          echo 'Version: ${{ github.event.inputs.version }}'
