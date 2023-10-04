@@ -9,8 +9,18 @@ on:
         default: "0.0.0"
 permissions: write-all
 jobs:
-  bumpVersion:
-    name: Bump Version
+  BumpVersion:
+      name: Bump Version
+      runs-on: ubuntu-latest
+      steps:
+        - name: Checkout repo
+          uses: actions/checkout@v3
+        - name: Bump version
+          run:  |
+            git pull --rebase origin master
+            echo "Repo pulled"
+  Output:
+    name: Output
     runs-on: ubuntu-latest
     steps:
       - name: Get output
