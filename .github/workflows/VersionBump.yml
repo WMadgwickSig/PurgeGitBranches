@@ -20,7 +20,7 @@ jobs:
           new_version=${{ github.event.inputs.version }}
           echo "New Version: $new_version"
           sed -i "s|<Version>.*</Version>|<Version>$new_version</Version>|" "GithubAction/GithubAction.csproj"
-          git add "GithubAction/GithubAction.csproj"
+          git add -A
           git config --global user.name ${{ github.actor }}
           git commit -m "Bump version to $new_version"
           git pull --rebase origin main
