@@ -10,19 +10,16 @@ on:
 permissions: write-all
 jobs:
   BumpVersion:
-      name: Bump Version
-      runs-on: ubuntu-latest
-      steps:
-        - name: Checkout repo
-          uses: actions/checkout@v3
-        - name: Bump version
-          run:  |
-            git pull --rebase origin main
-            echo "Repo pulled"
-  Output:
-    name: Output
+    name: Bump Version
     runs-on: ubuntu-latest
     steps:
-      - name: Get output
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Bump version
         run: |
-          echo 'Version: ${{ github.event.inputs.version }}'
+          new_version=${{ github.event.inputs.version }}
+          echo "New Version: $new_version"
+          sed -i "s|<Version>.*</Version>|<Version>$new_version</Version>|" GithubAction.csproj
+          git add GithubAction.csproj
+          git commit -m "Bump version to $new_version"
+          git push origin main
