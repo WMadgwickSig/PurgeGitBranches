@@ -13,8 +13,5 @@
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-    <Version>10.1.5</Version>
-  <PropertyGroup>
-  </PropertyGroup>
-    <Version>10.1.5</Version>
+	
 </Project>
