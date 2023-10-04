@@ -19,9 +19,9 @@ jobs:
         id: extract_version
         run: |
           if grep -q '<Version>.*<\/Version>' GithubAction/GithubAction.csproj; then
-            echo "version=${{ steps.extract_version.outputs.version }}" >> $GITHUB_ENV
+            echo "version=${{ steps.extract_version.outputs.version }}" >> $GITHUB_OUTPUT
           else
-            echo "version=0.0.0" >> $GITHUB_ENV
+            echo "version=0.0.0" >> $GITHUB_OUTPUT
           fi
       - name: Bump version
         run: |
