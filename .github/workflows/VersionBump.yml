@@ -25,7 +25,7 @@ jobs:
           fi
       - name: Bump version
         run: |
-          current_version=${{ env.version }}
+          current_version=${{ steps.extract_version.outputs.version }}
           new_version=${{ github.event.inputs.version }}
           echo "Current Version: $current_version"
           echo "New Version: $new_version"
