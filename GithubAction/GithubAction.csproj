@@ -12,7 +12,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>disable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>10.0.1</Version>
+    <Version>99.91</Version>
   </PropertyGroup>
 	
 </Project>
