@@ -25,3 +25,11 @@ jobs:
           git commit -m "Bump version to $new_version"
           git pull --rebase origin main
           git push origin main
+      - name: Save latest version to repo variable
+        uses: pretoriustheuns/updaterepovar@V1
+        with:
+          variable: LATEST_VERSION
+          newvalue: ${{ github.event.inputs.version }}
+          owner: William Madgwick
+          repo: PurgeGitBranches
+          token: ${{ secrets.GITHUB_TOKEN }}
