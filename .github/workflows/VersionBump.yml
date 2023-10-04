@@ -30,6 +30,6 @@ jobs:
         with:
           variable: LATEST_VERSION
           newvalue: ${{ github.event.inputs.version }}
-          owner: William Madgwick
+          owner: WMadgwickSig
           repo: PurgeGitBranches
           token: ${{ secrets.GITHUB_TOKEN }}
