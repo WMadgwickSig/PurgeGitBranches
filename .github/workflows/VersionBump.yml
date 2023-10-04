@@ -19,7 +19,7 @@ jobs:
         id: extract_version
         run: |
           if grep -q '<Version>.*<\/Version>' GithubAction/GithubAction.csproj; then
-            echo "version=${{ steps.extract_version.outputs.version }}" >> $GITHUB_OUTPUT
+            echo "version=$(grep -oP '<Version>\K[^<]+' GithubAction/GithubAction.csproj)" >> $GITHUB_OUTPUT
           else
             echo "version=0.0.0" >> $GITHUB_OUTPUT
           fi
