@@ -6,7 +6,7 @@ on:
         description: Version number to go to
         type: string
         required: true
-        default: "0.0.0"
+        default: ${{ vars.LATEST_VERSION }}
 permissions: write-all
 jobs:
   BumpVersion:
