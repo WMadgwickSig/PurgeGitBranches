@@ -23,7 +23,7 @@ jobs:
           else
             echo "::set-output name=version::0.0.0"
             echo "Version tag not found, adding it..."
-            sed -i '/<\/PropertyGroup>/i \    <Version>0.0.0<\/Version>' GithubAction/GithubAction.csproj
+            sed -i '/<\/PropertyGroup>/!b;n;c\    <Version>0.0.0<\/Version>' GithubAction/GithubAction.csproj
           fi
       - name: Bump version
         run: |
